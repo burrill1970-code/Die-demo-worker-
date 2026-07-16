@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dojo Intelligence Engine — Free Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fire: #ff4500;
+    --fire-dim: rgba(255,69,0,0.4);
+    --fire-faint: rgba(255,69,0,0.08);
+    --gold: #c8922a;
+    --bg: #040407;
+    --bg2: #080810;
+    --surface: rgba(12,12,20,0.95);
+    --text: #e2d8c8;
+    --text-dim: rgba(226,216,200,0.55);
+    --mono: 'Share Tech Mono', monospace;
+    --display: 'Bebas Neue', cursive;
+    --body: 'Rajdhani', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,69,0,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,69,0,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,69,0,0.5) 40%, rgba(255,140,0,0.8) 50%, rgba(255,69,0,0.5) 60%, transparent 100%);
+    animation: scanline 6s linear infinite;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  @keyframes scanline {
+    0%   { top: -4px; opacity: 0; }
+    5%   { opacity: 1; }
+    95%  { opacity: 0.4; }
+    100% { top: 100vh; opacity: 0; }
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+  }
+
+  /* HEADER */
+  #header {
+    padding: 20px 0 16px;
+    border-bottom: 1px solid rgba(255,69,0,0.15);
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-left .eyebrow {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--fire-dim);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 4px;
+  }
+
+  .pulse-dot {
+    width: 6px; height: 6px;
+    background: var(--fire);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--fire);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .header-left h1 {
+    font-family: var(--display);
+    font-size: 28px;
+    letter-spacing: 4px;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .header-left h1 span { color: var(--fire); }
+
+  .preview-badge {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--fire-dim);
+    border: 1px solid rgba(255,69,0,0.2);
+    padding: 4px 10px;
+    text-transform: uppercase;
+  }
+
+  /* HERO */
+  #hero {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  #hero h2 {
+    font-family: var(--display);
+    font-size: clamp(36px, 8vw, 64px);
+    letter-spacing: 4px;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+
+  #hero h2 em {
+    color: var(--fire);
+    font-style: normal;
+    text-shadow: 0 0 30px rgba(255,69,0,0.5);
+  }
+
+  #hero p {
+    font-size: 16px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    max-width: 500px;
+    margin: 0 auto 24px;
+  }
+
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .hero-stat {
+    text-align: center;
+  }
+
+  .hero-stat .val {
+    font-family: var(--display);
+    font-size: 32px;
+    color: var(--fire);
+    letter-spacing: 2px;
+    text-shadow: 0 0 16px rgba(255,69,0,0.4);
+    line-height: 1;
+  }
+
+  .hero-stat .lbl {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  /* DEMO BOX */
+  #demo-box {
+    background: var(--surface);
+    border: 1px solid rgba(255,69,0,0.18);
+    border-radius: 3px;
+    padding: 32px;
+    margin-bottom: 32px;
+    box-shadow: 0 0 60px rgba(255,69,0,0.04);
+  }
+
+  .demo-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--fire-dim);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  /* CHIPS */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .chip {
+    background: transparent;
+    border: 1px solid rgba(255,69,0,0.2);
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+    text-align: left;
+  }
+
+  .chip:hover {
+    border-color: var(--fire);
+    color: var(--text);
+    background: var(--fire-faint);
+  }
+
+  /* INPUT */
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+
+  textarea {
+    flex: 1;
+    background: rgba(4,4,7,0.9);
+    border: 1px solid rgba(255,69,0,0.22);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 15px;
+    padding: 12px 14px;
+    border-radius: 2px;
+    outline: none;
+    resize: none;
+    line-height: 1.5;
+    transition: border-color 0.2s;
+  }
+
+  textarea:focus { border-color: var(--fire); }
+
+  textarea::placeholder { color: rgba(226,216,200,0.25); }
+
+  #ask-btn {
+    background: rgba(255,69,0,0.1);
+    border: 1px solid rgba(255,69,0,0.5);
+    color: #ff7040;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 12px 20px;
+    cursor: pointer;
+    border-radius: 2px;
+    text-transform: uppercase;
+    transition: all 0.15s;
+    white-space: nowrap;
+    align-self: stretch;
+  }
+
+  #ask-btn:hover:not(:disabled) {
+    background: rgba(255,69,0,0.2);
+    box-shadow: 0 0 20px rgba(255,69,0,0.2);
+  }
+
+  #ask-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ANSWER */
+  #answer-wrap {
+    display: none;
+    margin-top: 28px;
+    border-top: 1px solid rgba(255,69,0,0.1);
+    padding-top: 24px;
+  }
+
+  .answer-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--fire-dim);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  #answer-text {
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.75;
+    white-space: pre-wrap;
+  }
+
+  /* TYPING */
+  .typing {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    padding: 4px 0;
+  }
+
+  .typing span {
+    width: 5px; height: 5px;
+    background: var(--fire);
+    border-radius: 50%;
+    animation: blink 1.2s ease-in-out infinite;
+  }
+
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes blink {
+    0%, 80%, 100% { opacity: 0.2; }
+    40% { opacity: 1; }
+  }
+
+  /* WALL */
+  #wall {
+    display: none;
+    background: rgba(4,4,7,0.97);
+    border: 1px solid rgba(255,69,0,0.3);
+    border-radius: 3px;
+    padding: 36px 32px;
+    text-align: center;
+    box-shadow: 0 0 80px rgba(255,69,0,0.08);
+  }
+
+  #wall .wall-eye {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--fire-dim);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  #wall h3 {
+    font-family: var(--display);
+    font-size: clamp(28px, 6vw, 48px);
+    letter-spacing: 3px;
+    color: var(--text);
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+
+  #wall h3 span { color: var(--fire); }
+
+  #wall p {
+    font-size: 15px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    max-width: 420px;
+    margin: 0 auto 28px;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    background: var(--fire);
+    color: #fff;
+    font-family: var(--display);
+    font-size: 22px;
+    letter-spacing: 3px;
+    padding: 14px 40px;
+    border-radius: 2px;
+    text-decoration: none;
+    box-shadow: 0 0 30px rgba(255,69,0,0.4);
+    transition: all 0.15s;
+    border: none;
+    cursor: pointer;
+  }
+
+  .cta-btn:hover {
+    background: #ff6020;
+    box-shadow: 0 0 50px rgba(255,69,0,0.6);
+    transform: translateY(-1px);
+  }
+
+  .cta-note {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-top: 16px;
+  }
+
+  .cta-note span { color: var(--gold); }
+
+  /* FOOTER */
+  #footer {
+    text-align: center;
+    margin-top: 48px;
+    border-top: 1px solid rgba(255,69,0,0.08);
+    padding-top: 24px;
+  }
+
+  #footer p {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(226,216,200,0.2);
+    letter-spacing: 1.5px;
+    line-height: 2;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="header">
+    <div class="header-left">
+      <div class="eyebrow"><div class="pulse-dot"></div>LIVE DEMO</div>
+      <h1>DOJO <span>INTELLIGENCE</span> ENGINE</h1>
+    </div>
+    <div class="preview-badge">1 FREE QUESTION</div>
+  </div>
+
+  <div id="hero">
+    <h2>35 YEARS ON THE MAT.<br><em>ASK ANYTHING.</em></h2>
+    <p>An AI advisor built for BJJ school owners — retention, pricing, trial conversion, culture, competition. One free question. No signup. No key required.</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="val">35</div>
+        <div class="lbl">Years Experience</div>
+      </div>
+      <div class="hero-stat">
+        <div class="val">10K+</div>
+        <div class="lbl">Students Trained</div>
+      </div>
+      <div class="hero-stat">
+        <div class="val">$35</div>
+        <div class="lbl">Full Engine</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="demo-box">
+    <div class="demo-label">// ask your question</div>
+    <p style="margin: 0 0 12px; opacity: 0.7; font-size: 0.95em;">Ask me anything about running your school — or pick a starter question below.</p>
+
+    <div class="input-row">
+      <textarea id="q-input" rows="3" placeholder="e.g. Why do my students quit at month three?"></textarea>
+      <button id="ask-btn">ASK</button>
+    </div>
+
+    <div class="chips" id="chips"></div>
+
+    <div id="answer-wrap">
+      <div class="answer-label">// DOJO ENGINE RESPONDS</div>
+      <div id="answer-text"></div>
+    </div>
+  </div>
+
+  <div id="wall">
+    <div class="wall-eye">// DEMO LIMIT REACHED</div>
+    <h3>THAT WAS ONE QUESTION.<br>THE FULL ENGINE IS <span>UNLIMITED.</span></h3>
+    <p>$35. One dollar for every year on the mat. Your key, your data, your conversations — private and yours forever.</p>
+    <a class="cta-btn" href="https://slickbot.gumroad.com/l/bfumjm" target="_blank">GET THE FULL ENGINE — $35</a>
+    <div class="cta-note">One time. No subscription. <span>Unlimited questions.</span></div>
+  </div>
+
+  <div id="footer">
+    <p>Tim Burrill · Founder, Tim Burrill BJJ · Providence RI<br>
+    One of Carlos Machado's First Black Belts · One of the First Americans Black-Belted in BJJ<br>
+    Part of the Dojo Transparency Project</p>
+  </div>
+
+</div>
+
+<script>
+const PROXY = 'https://die-demo-proxy.slickreplika.workers.dev';
+
+const SYSTEM = `You are the Dojo Intelligence Engine — an elite AI advisor built for martial arts school owners. You carry 35 years of real-world BJJ and martial arts school operations wisdom.
+
+YOUR EXPERTISE:
+- Student retention: the real reasons students quit at 3, 6, and 12 months — and how to fix them
+- Pricing architecture: memberships, EFTs, pricing psychology, what the market actually bears
+- Trial conversion: the exact friction points that kill sign-ups and how to remove them
+- Lead generation: organic, referral, social — what costs nothing and what converts
+- Curriculum and belt progression systems: balancing authenticity with student motivation
+- Staff and instructor development: building loyalty, avoiding politics, scaling teaching
+- School culture: the invisible thing that determines if students stay for years or months
+- Marketing and copywriting: what school owners get wrong and what cuts through
+- Competitive positioning: how to win against McDojo chains without compromising integrity
+- Year-one survival: the five things that kill schools before they find their footing
+- Financial basics: revenue per mat, class capacity, multiple revenue streams
+- The Dojo Transparency Project framework: spotting and avoiding predatory industry tactics
+
+YOUR VOICE:
+Direct. Battle-tested. Zero filler. You think like a seasoned black belt who also built a real business — not a consultant, not a marketer, not a corporate talking head.
+
+FORMAT:
+- Short answers (3-5 sentences) for focused questions
+- Numbered lists or short bullets when breaking down a process
+- Longer only when the complexity genuinely demands it
+- Never pad. Never hedge unnecessarily.`;
+
+const CHIPS = [
+  "Why do students quit at month three?",
+  "Is my pricing structure hurting retention?",
+  "How do I convert trial students without pressure?",
+  "What kills BJJ schools in year one?",
+  "How do I compete with a McDojo nearby?",
+  "Should I use long-term contracts?",
+];
+
+let used = false;
+
+// build chips
+const chipsEl = document.getElementById('chips');
+CHIPS.forEach(q => {
+  const b = document.createElement('button');
+  b.className = 'chip';
+  b.textContent = q;
+  b.onclick = () => {
+    document.getElementById('q-input').value = q;
+    document.getElementById('q-input').focus();
+  };
+  chipsEl.appendChild(b);
+});
+
+// ask
+document.getElementById('ask-btn').onclick = fireQuestion;
+document.getElementById('q-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); fireQuestion(); }
+});
+
+async function fireQuestion() {
+  if (used) return;
+  const q = document.getElementById('q-input').value.trim();
+  if (!q) return;
+
+  used = true;
+  const btn = document.getElementById('ask-btn');
+  btn.disabled = true;
+  document.getElementById('q-input').disabled = true;
+  chipsEl.style.pointerEvents = 'none';
+  chipsEl.style.opacity = '0.3';
+
+  const answerWrap = document.getElementById('answer-wrap');
+  const answerText = document.getElementById('answer-text');
+  answerWrap.style.display = 'block';
+  answerText.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+
+  try {
+    const res = await fetch(PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 600,
+        system: SYSTEM,
+        messages: [{ role: 'user', content: q }]
+      })
+    });
+
+    const data = await res.json();
+    const reply = data.content?.map(b => b.text || '').join('') || 'No response.';
+    answerText.textContent = reply;
+
+  } catch(err) {
+    answerText.textContent = '⚠ Connection error. Please try again.';
+    used = false;
+    btn.disabled = false;
+    document.getElementById('q-input').disabled = false;
+    return;
+  }
+
+  // show wall after short delay
+  setTimeout(() => {
+    document.getElementById('wall').style.display = 'block';
+    document.getElementById('wall').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 1800);
+}
+</script>
+</body>
+</html>
